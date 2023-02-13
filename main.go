@@ -11,7 +11,17 @@ import (
 
 func main() {
 
-	req, err := http.NewRequest(http.MethodGet, "https://www.cifraclub.com.br/harpa-crista/porque-ele-vive/imprimir.html", nil)
+	// Get score for a given song:
+	artistName := "harpa-crista"
+	songName := "porque-ele-vive"
+
+	// this link can be generated on the fly; just format the artist and song name accordingly
+	songScoreLink := fmt.Sprintf("https://www.cifraclub.com.br/%s/%s/imprimir.html",
+		artistName,
+		songName,
+	)
+
+	req, err := http.NewRequest(http.MethodGet, songScoreLink, nil)
 	if err != nil {
 		fmt.Println("NewRequest", err)
 		return
@@ -36,6 +46,7 @@ func main() {
 
 	htmlDomElement := string(b)
 
+	// Extract only the score contents from song's HTML
 	r2, err := regexp.Compile("<pre>(.|\\n)*?<\\/pre>")
 	if err != nil {
 		fmt.Println("Compile", err)
@@ -44,6 +55,7 @@ func main() {
 
 	matched := r2.FindAllString(htmlDomElement, -1)
 
+	// Put score into HTML output
 	//language=HTML
 	htmlPage := fmt.Sprintf(`
 		<html>
@@ -58,6 +70,7 @@ func main() {
 		</html>
 	`, matched[0])
 
+	// Create and write html to output file
 	file, err := os.Create("song.html")
 	if err != nil {
 		fmt.Println("Create")
