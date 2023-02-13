@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -45,10 +44,19 @@ func main() {
 
 	matched := r2.FindAllString(htmlDomElement, -1)
 
-	b, err = json.Marshal(matched[0])
-	if err != nil {
-		return
-	}
+	//language=HTML
+	htmlPage := fmt.Sprintf(`
+		<html>
+			<head>
+				<title>
+					SONG GENERATOR
+				</title>
+			</head>
+			<main>
+				%s
+			</main>
+		</html>
+	`, matched[0])
 
 	file, err := os.Create("song.html")
 	if err != nil {
@@ -56,7 +64,7 @@ func main() {
 		return
 	}
 
-	_, err = file.WriteString(matched[0])
+	_, err = file.WriteString(htmlPage)
 	if err != nil {
 		log.Println("WriteFile")
 		return
