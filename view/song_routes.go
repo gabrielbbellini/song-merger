@@ -2,8 +2,8 @@ package view
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"song-merger/controller"
 	"song-merger/entities"
@@ -16,7 +16,7 @@ func SetSongRoutes() {
 func generateSongs(w http.ResponseWriter, r *http.Request) {
 	b, err := io.ReadAll(r.Body)
 	if err != nil {
-		fmt.Println("[generateSongs] Error ReadAll")
+		log.Println("[generateSongs] Error ReadAll")
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -24,14 +24,14 @@ func generateSongs(w http.ResponseWriter, r *http.Request) {
 	var songRequest entities.SongRequest
 	err = json.Unmarshal(b, &songRequest)
 	if err != nil {
-		fmt.Println("[generateSongs] Error ReadAll")
+		log.Println("[generateSongs] Error ReadAll")
 		http.Error(w, err.Error(), http.StatusUnprocessableEntity)
 		return
 	}
 
 	_, exception := controller.GenerateSong(songRequest)
 	if exception != nil {
-		fmt.Println("[generateSongs] Error ReadAll")
+		log.Println("[generateSongs] Error ReadAll")
 		http.Error(w, exception.Message, exception.Code)
 		return
 	}

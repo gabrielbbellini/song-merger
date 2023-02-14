@@ -24,7 +24,7 @@ func requestSong(songURL string) (*http.Response, error) {
 }
 
 func newSongURL(song entities.SongRequest) string {
-	return fmt.Sprintf("https://www.cifraclub.com.br/%s/%s/imprimir.html?key=%s",
+	return fmt.Sprintf("https://www.cifraclub.com.br/%s/%s/imprimir.html#key=%s",
 		song.ArtistName,
 		song.Name,
 		strconv.FormatUint(song.MusicalTone, 10),
@@ -39,9 +39,9 @@ func GenerateSong(song entities.SongRequest) (string, *utils.Exception) {
 		return "", utils.NewException(err.Error(), 500)
 	}
 	if response.StatusCode != http.StatusOK {
-		fmt.Println("[GenerateSong] Error response.StatusCode != http.StatusOK")
+		log.Println("[GenerateSong] Error response.StatusCode != http.StatusOK")
 		return "", utils.NewException(
-			fmt.Sprintf("A requisição para %s falhou. Error: %s", url, response.Status),
+			fmt.Sprintf("Request for %s failed. Error: %s", url, response.Status),
 			500,
 		)
 	}
@@ -55,13 +55,13 @@ func GenerateSong(song entities.SongRequest) (string, *utils.Exception) {
 	htmlElement := string(b)
 	score, exception := extractPreTagFromHTML(htmlElement)
 	if err != nil {
-		fmt.Println("[getSong] Error extractPreTagFromHTML", err)
+		log.Println("[getSong] Error extractPreTagFromHTML", err)
 		return "", exception
 	}
 
 	exception = createSongPage("song.html", score)
 	if exception != nil {
-		fmt.Println("[getSong] Error createSongPage", err)
+		log.Println("[getSong] Error createSongPage", err)
 		return "", exception
 	}
 
@@ -99,7 +99,7 @@ func createSongPage(filename, score string) *utils.Exception {
 
 	err = file.Close()
 	if err != nil {
-		fmt.Println("[createSongPage] Error Close")
+		log.Println("[createSongPage] Error Close")
 		return utils.NewException(err.Error(), 500)
 	}
 
@@ -110,13 +110,13 @@ func createSongPage(filename, score string) *utils.Exception {
 func extractPreTagFromHTML(htmlElement string) (string, *utils.Exception) {
 	r2, err := regexp.Compile("<pre>(.|\\n)*?<\\/pre>")
 	if err != nil {
-		fmt.Println("[extractPreTagFromHTML] Error Compile", err)
+		log.Println("[extractPreTagFromHTML] Error Compile", err)
 		return "", utils.NewException(err.Error(), 500)
 	}
 	matched := r2.FindAllString(htmlElement, -1)
 
 	if len(matched) < 1 {
-		fmt.Println("[extractPreTagFromHTML] Error len(matched) < 1")
+		log.Println("[extractPreTagFromHTML] Error len(matched) < 1")
 		return "", utils.NewException("Score not found", 500)
 	}
 
