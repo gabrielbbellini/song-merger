@@ -10,10 +10,24 @@ The command above starts a server listening to `localhost:8000`, to which you ca
 ### Current Routes
 - `/songs`
   - Receives a JSON with song parameters
+  - Sample JSON below:
+
+```json
+{
+    "name": "tempo-perdido",
+    "artistName": "legiao-urbana",
+    "musicalTone": 0
+}
+```
 
 ## To-dos
-- [ ] Put text into an output file
+- [X] Put text into an output file
+- [X] Get song names from a JSON
+- [ ] Get song parameters from a JSON
+  - [X] Key
+  - [X] Capo
+  - [ ] Toggle tabs
+- [ ] Get song title to put in merged HTML
+- [ ] Receive a list of JSON objects in the payload and treat each one as a separate song
 - [ ] Put all scores into a single HTML document
 - [ ] Convert HTML to PDF (maybe?)
-- [ ] Get song names from a JSON
-- [ ] Get song parameters from a JSON (key, capo, etc)
