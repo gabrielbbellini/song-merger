@@ -15,8 +15,8 @@ The command above starts a server listening to `localhost:8000`, to which you ca
 ```json
 {
     "name": "tempo-perdido",
-    "artistName": "legiao-urbana",
-    "musicalTone": 0
+    "artist": "legiao-urbana",
+    "tone": 0
 }
 ```
 
