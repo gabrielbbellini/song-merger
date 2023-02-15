@@ -38,6 +38,6 @@ func generateSongs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, "http://localhost:8000/songs/song.html", http.StatusSeeOther)
+	_, _ = w.Write([]byte("Sua música foi gerada com sucesso (Ver pasta \"public\" no projeto)."))
 	return
 }
