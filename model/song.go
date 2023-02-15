@@ -96,13 +96,14 @@ func generateSongHTMLTemplate(score string) string {
 }
 
 func generateSongFile(fileName, html string) error {
-	err := store.Manager().CreateFile(fileName)
+	storeManager := store.Manager()
+	err := storeManager.CreateFile(fileName)
 	if err != nil {
 		log.Println("[createSongPage] Error CreateFile")
 		return err
 	}
 
-	err = store.Manager().WriteStringFile(fileName, html)
+	err = storeManager.WriteStringFile(fileName, html)
 	if err != nil {
 		log.Println("[createSongPage] Error WriteStringFile")
 		return err
