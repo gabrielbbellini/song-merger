@@ -2,17 +2,21 @@ package view
 
 import (
 	"encoding/json"
+	"github.com/gorilla/mux"
 	"io"
 	"log"
 	"net/http"
 	"song-merger/controller"
 	"song-merger/entities"
+	"song-merger/utils"
 )
 
-func SetSongRoutes() {
-	http.HandleFunc("/songs", generateSongs)
+// SetSongRoutes - Create all song entity routes.
+func SetSongRoutes(router *mux.Router) {
+	router.HandleFunc("/songs", generateSongs).Methods(http.MethodPost)
 }
 
+// generateSongs - Return the PDF that contains the merged songs.
 func generateSongs(w http.ResponseWriter, r *http.Request) {
 	b, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -21,21 +25,19 @@ func generateSongs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var songRequest entities.SongRequest
-	err = json.Unmarshal(b, &songRequest)
+	var song entities.Song
+	err = json.Unmarshal(b, &song)
 	if err != nil {
-		log.Println("[generateSongs] Error ReadAll")
-		http.Error(w, err.Error(), http.StatusUnprocessableEntity)
+		utils.HandleError(w, err, "[generateSongs] Error Unmarshal")
 		return
 	}
 
-	_, exception := controller.GenerateSong(songRequest)
-	if exception != nil {
-		log.Println("[generateSongs] Error ReadAll")
-		http.Error(w, exception.Message, exception.Code)
+	_, err = controller.GenerateSong(song)
+	if err != nil {
+		utils.HandleError(w, err, "GenerateSong")
 		return
 	}
 
-	http.Redirect(w, r, "http://localhost:8000/song.html", http.StatusSeeOther)
+	http.Redirect(w, r, "http://localhost:8000/songs/song.html", http.StatusSeeOther)
 	return
 }

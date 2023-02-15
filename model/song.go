@@ -5,17 +5,16 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"os"
-	"regexp"
 	"song-merger/entities"
-	utils "song-merger/exception"
+	"song-merger/store"
+	"song-merger/utils"
 	"strconv"
 )
 
 func requestSong(songURL string) (*http.Response, error) {
 	request, err := http.NewRequest(http.MethodGet, songURL, nil)
 	if err != nil {
-		fmt.Println("NewRequest", err)
+		fmt.Println("[requestSong] Error NewRequest")
 		return nil, err
 	}
 
@@ -23,55 +22,66 @@ func requestSong(songURL string) (*http.Response, error) {
 	return client.Do(request)
 }
 
-func newSongURL(song entities.SongRequest) string {
-	return fmt.Sprintf("https://www.cifraclub.com.br/%s/%s/imprimir.html#key=%s",
-		song.ArtistName,
+func getSongHTMLPage(song entities.Song) (string, error) {
+	url := fmt.Sprintf("https://www.cifraclub.com.br/%s/%s/imprimir.html#key=%s",
+		song.Artist,
 		song.Name,
 		strconv.FormatUint(song.MusicalTone, 10),
 	)
-}
 
-func GenerateSong(song entities.SongRequest) (string, *utils.Exception) {
-	url := newSongURL(song)
 	response, err := requestSong(url)
 	if err != nil {
 		log.Println("[GenerateSong] Error requestSong")
-		return "", utils.NewException(err.Error(), 500)
+		return "", err
 	}
 	if response.StatusCode != http.StatusOK {
 		log.Println("[GenerateSong] Error response.StatusCode != http.StatusOK")
-		return "", utils.NewException(
-			fmt.Sprintf("Request for %s failed. Error: %s", url, response.Status),
-			500,
-		)
+		return "", utils.NewErrorFromStatusCode(response.StatusCode, "Erro inesperado ao consultar cifra")
 	}
 
 	b, err := io.ReadAll(response.Body)
 	if err != nil {
-		fmt.Println("[getSong] Error ReadAll", err)
-		return "", utils.NewException(err.Error(), 500)
+		fmt.Println("[getSong] Error ReadAll")
+		return "", err
 	}
 
-	htmlElement := string(b)
-	score, exception := extractPreTagFromHTML(htmlElement)
+	return string(b), nil
+}
+
+//GenerateSong - Create the merged songs file by doing requests and get the song score.
+func GenerateSong(song entities.Song) (string, error) {
+	html, err := getSongHTMLPage(song)
 	if err != nil {
-		log.Println("[getSong] Error extractPreTagFromHTML", err)
-		return "", exception
+		log.Println("[GenerateSong] Error getSongHTMLPage")
+		return "", err
 	}
 
-	exception = createSongPage("song.html", score)
-	if exception != nil {
-		log.Println("[getSong] Error createSongPage", err)
-		return "", exception
+	score, err := utils.ExtractTagFromHTML("pre", html)
+	if err != nil {
+		log.Println("[getSong] Error ExtractTagFromHTML")
+		return "", err
+	}
+	if score == "" {
+		log.Println("[getSong] Error ExtractTagFromHTML")
+		return "", entities.NewNotFoundError(fmt.Sprintf("Cifra da música \"%s\" não foi encontrada.", song.Name))
+	}
+
+	err = createSongFile(fmt.Sprintf(
+		"%s-%s-%d.html",
+		song.Name,
+		song.Artist,
+		song.MusicalTone,
+	), score)
+	if err != nil {
+		log.Println("[getSong] Error createSongPage")
+		return "", err
 	}
 
 	return "", nil
 }
 
-func createSongPage(filename, score string) *utils.Exception {
-	// Put score into HTML output
-	//language=HTML
-	htmlPage := fmt.Sprintf(`
+func generateSongHTMLTemplate(score string) string {
+	return fmt.Sprintf(`
 		<html>
 			<head>
 				<title>
@@ -83,42 +93,25 @@ func createSongPage(filename, score string) *utils.Exception {
 			</main>
 		</html>
 	`, score)
+}
 
-	// Create and write html to output file
-	file, err := os.Create("./public/" + filename)
+func generateSongFile(fileName, score string) error {
+	err := store.Manager().CreateFile(fileName)
 	if err != nil {
-		log.Println("[createSongPage] Error Create")
-		return nil
+		log.Println("[createSongPage] Error CreateFile")
+		return err
 	}
 
-	_, err = file.WriteString(htmlPage)
+	err = store.Manager().WriteStringFile(fileName, score)
 	if err != nil {
-		log.Println("[createSongPage] Error WriteString")
-		return utils.NewException(err.Error(), 500)
-	}
-
-	err = file.Close()
-	if err != nil {
-		log.Println("[createSongPage] Error Close")
-		return utils.NewException(err.Error(), 500)
+		log.Println("[createSongPage] Error WriteStringFile")
+		return err
 	}
 
 	return nil
 }
 
-// extractPreTagFromHTML Extract only the score contents from song's HTML
-func extractPreTagFromHTML(htmlElement string) (string, *utils.Exception) {
-	r2, err := regexp.Compile("<pre>(.|\\n)*?<\\/pre>")
-	if err != nil {
-		log.Println("[extractPreTagFromHTML] Error Compile", err)
-		return "", utils.NewException(err.Error(), 500)
-	}
-	matched := r2.FindAllString(htmlElement, -1)
-
-	if len(matched) < 1 {
-		log.Println("[extractPreTagFromHTML] Error len(matched) < 1")
-		return "", utils.NewException("Score not found", 500)
-	}
-
-	return matched[0], nil
+func createSongFile(fileName, score string) error {
+	html := generateSongHTMLTemplate(score)
+	return generateSongFile(fileName, html)
 }

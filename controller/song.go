@@ -3,23 +3,23 @@ package controller
 import (
 	"log"
 	"song-merger/entities"
-	utils "song-merger/exception"
 	"song-merger/model"
 	"strings"
 )
 
-func GenerateSong(song entities.SongRequest) (string, *utils.Exception) {
-	song.ArtistName = strings.TrimSpace(song.ArtistName)
+// GenerateSong - Validate song entity before generate the song file.
+func GenerateSong(song entities.Song) (string, error) {
+	song.Artist = strings.TrimSpace(song.Artist)
 	song.Name = strings.TrimSpace(song.Name)
 
-	if song.ArtistName == "" {
-		log.Println("[GenerateSong] Error song.ArtistName == \"\"")
-		return "", utils.NewException("Artist name can not be empty.", 400)
+	if song.Artist == "" {
+		log.Println("[GenerateSong] Error song.Artist == ''")
+		return "", entities.NewBadRequestError("Artist name can not be empty.")
 	}
 
 	if song.Name == "" {
-		log.Println("[GenerateSong] Error song.Name == \"\"")
-		return "", utils.NewException("Song name can not be empty.", 400)
+		log.Println("[GenerateSong] Error song.Name == ''")
+		return "", entities.NewBadRequestError("Song name can not be empty.")
 	}
 
 	return model.GenerateSong(song)
