@@ -9,6 +9,7 @@ import (
 	"song-merger/store"
 	"song-merger/utils"
 	"strconv"
+	"strings"
 )
 
 func requestSong(songURL string) (*http.Response, error) {
@@ -26,7 +27,7 @@ func getSongHTMLPage(song entities.Song) (string, error) {
 	url := fmt.Sprintf("https://www.cifraclub.com.br/%s/%s/imprimir.html#key=%s",
 		song.Artist,
 		song.Name,
-		strconv.FormatUint(song.MusicalTone, 10),
+		strconv.FormatUint(song.Tone, 10),
 	)
 
 	response, err := requestSong(url)
@@ -66,12 +67,7 @@ func GenerateSong(song entities.Song) (string, error) {
 		return "", entities.NewNotFoundError(fmt.Sprintf("Cifra da música \"%s\" não foi encontrada.", song.Name))
 	}
 
-	err = createSongFile(fmt.Sprintf(
-		"%s-%s-%d.html",
-		song.Name,
-		song.Artist,
-		song.MusicalTone,
-	), score)
+	err = createSongFile(song, score)
 	if err != nil {
 		log.Println("[getSong] Error createSongPage")
 		return "", err
@@ -80,7 +76,7 @@ func GenerateSong(song entities.Song) (string, error) {
 	return "", nil
 }
 
-func generateSongHTMLTemplate(score string) string {
+func generateSongHTMLTemplate(song entities.Song, score string) string {
 	return fmt.Sprintf(`
 		<html>
 			<head>
@@ -89,13 +85,24 @@ func generateSongHTMLTemplate(score string) string {
 				</title>
 			</head>
 			<main>
+				<h1>%s</h1>
+				<h2>%s</h2>
 				%s
 			</main>
 		</html>
-	`, score)
+	`, strings.Replace(song.Name, "-", " ", -1),
+		strings.Replace(song.Artist, "-", " ", -1),
+		score)
 }
 
-func generateSongFile(fileName, html string) error {
+func generateSongFile(song entities.Song, html string) error {
+	fileName := fmt.Sprintf(
+		"%s-%s-%d.html",
+		song.Name,
+		song.Artist,
+		song.Tone,
+	)
+
 	storeManager := store.Manager()
 	err := storeManager.CreateFile(fileName)
 	if err != nil {
@@ -112,7 +119,7 @@ func generateSongFile(fileName, html string) error {
 	return nil
 }
 
-func createSongFile(fileName, score string) error {
-	html := generateSongHTMLTemplate(score)
-	return generateSongFile(fileName, html)
+func createSongFile(song entities.Song, score string) error {
+	html := generateSongHTMLTemplate(song, score)
+	return generateSongFile(song, html)
 }
