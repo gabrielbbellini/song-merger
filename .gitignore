@@ -19,5 +19,4 @@
 .vscode/
 
 # Project-specific output files
-song.html
-song.txt
+public
