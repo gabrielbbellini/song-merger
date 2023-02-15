@@ -31,6 +31,5 @@ func main() {
 		ReadTimeout:  15 * time.Second,
 	}
 
-	http.Handle("/", http.FileServer(http.Dir("./public")))
 	log.Fatal(server.ListenAndServe())
 }
