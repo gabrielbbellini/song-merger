@@ -1,12 +1,15 @@
 package main
 
 import (
-	"github.com/gorilla/mux"
 	"log"
 	"net/http"
 	"song-merger/view"
 	"time"
+
+	"github.com/gorilla/mux"
 )
+
+const SERVER_URL string = "127.0.0.1:8000"
 
 // Apply the rules to the api router
 func apiMiddleware(handler http.Handler) http.Handler {
@@ -26,10 +29,12 @@ func main() {
 
 	server := &http.Server{
 		Handler:      router,
-		Addr:         "127.0.0.1:8000",
+		Addr:         SERVER_URL,
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
 	}
+
+	log.Printf("Listening on %s...", SERVER_URL)
 
 	log.Fatal(server.ListenAndServe())
 }
