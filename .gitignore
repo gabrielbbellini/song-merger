@@ -18,5 +18,7 @@
 .idea/
 .vscode/
 
+.obsidian/
+
 # Project-specific output files
 public
