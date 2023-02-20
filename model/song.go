@@ -28,10 +28,11 @@ func requestSong(songURL string) (*http.Response, error) {
 }
 
 func getSongHTMLPage(song entities.Song) (string, error) {
-	url := fmt.Sprintf("https://www.cifraclub.com.br/%s/%s/imprimir.html#key=%s",
+	url := fmt.Sprintf("https://www.cifraclub.com.br/%s/%s/imprimir.html#key=%s&tabs=%t",
 		song.Artist,
 		song.Name,
 		strconv.FormatUint(song.Tone, 10),
+		song.Tabs,
 	)
 
 	response, err := requestSong(url)
