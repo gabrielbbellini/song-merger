@@ -10,8 +10,8 @@ type Song struct {
 	Tabs   bool   `json:"tabs"`
 }
 
-// SongTemplateData entity that is used to generate the html file.
-type SongTemplateData struct {
+// SongTemplate entity that is used to generate the html file.
+type SongTemplate struct {
 	Song        Song
 	HTMLContent template.HTML
 }

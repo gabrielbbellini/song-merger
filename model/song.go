@@ -55,7 +55,7 @@ func getSongHTMLPage(song entities.Song) (string, error) {
 
 // GenerateSongs - Create the merged songs file by doing requests and get the song score.
 func GenerateSongs(songs []entities.Song) (string, error) {
-	var songsTemplateData []entities.SongTemplateData
+	var songsTemplate []entities.SongTemplate
 	for _, song := range songs {
 		songScore, err := getSongScore(song)
 		if err != nil {
@@ -63,15 +63,15 @@ func GenerateSongs(songs []entities.Song) (string, error) {
 			return "", err
 		}
 
-		songTemplateData := entities.SongTemplateData{
+		SongTemplate := entities.SongTemplate{
 			Song:        song,
 			HTMLContent: template.HTML(songScore),
 		}
 
-		songsTemplateData = append(songsTemplateData, songTemplateData)
+		songsTemplate = append(songsTemplate, SongTemplate)
 	}
 
-	return generateSongsHTMLTemplate(songsTemplateData)
+	return generateSongsHTMLTemplate(songsTemplate)
 }
 
 func getSongScore(song entities.Song) (string, error) {
@@ -94,7 +94,7 @@ func getSongScore(song entities.Song) (string, error) {
 	return score, nil
 }
 
-func generateSongsHTMLTemplate(songsTemplateData []entities.SongTemplateData) (string, error) {
+func generateSongsHTMLTemplate(songsTemplate []entities.SongTemplate) (string, error) {
 	var templ *template.Template
 	var err error
 
@@ -109,7 +109,7 @@ func generateSongsHTMLTemplate(songsTemplateData []entities.SongTemplateData) (s
 	}
 
 	var songTemplate bytes.Buffer
-	if err = templ.Execute(&songTemplate, songsTemplateData); err != nil {
+	if err = templ.Execute(&songTemplate, songsTemplate); err != nil {
 		log.Println("[generateSongsHTMLTemplate] Error Execute")
 		return "", err
 	}
