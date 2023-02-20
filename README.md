@@ -5,7 +5,7 @@
 go run main.go
 ```
 
-The command above starts a server listening to `localhost:8000`, to which you can send requests to all the routes.
+The command above starts a server listening to `127.0.0.1:8000`, to which you can send requests to all the routes.
 
 ### Current Routes
 - `/songs`
@@ -13,11 +13,18 @@ The command above starts a server listening to `localhost:8000`, to which you ca
   - Sample JSON below:
 
 ```json
-{
-    "name": "tempo-perdido",
-    "artist": "legiao-urbana",
-    "tone": 0
-}
+[
+    {
+        "name": "ride",
+        "artist": "twenty-one-pilots",
+        "musicalTone": 4
+    },
+    {
+        "name": "dust-in-the-wind",
+        "artist": "Kansas",
+        "musicalTone": 3
+    }
+]
 ```
 
 ## To-dos
@@ -27,7 +34,7 @@ The command above starts a server listening to `localhost:8000`, to which you ca
   - [X] Key
   - [X] Capo
   - [ ] Toggle tabs
-- [ ] Get song title to put in merged HTML
-- [ ] Receive a list of JSON objects in the payload and treat each one as a separate song
-- [ ] Put all scores into a single HTML document
-- [ ] Convert HTML to PDF (maybe?)
+- [X] Get song title to put in merged HTML
+- [X] Receive a list of JSON objects in the payload and treat each one as a separate song
+- [X] Put all scores into a single HTML document
+- [X] Convert HTML to PDF (maybe?)
