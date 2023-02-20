@@ -7,17 +7,17 @@ import (
 )
 
 type Store struct {
-	rootPath string
+	RootPath string
 }
 
 func Manager() *Store {
 	return &Store{
-		rootPath: "./public/",
+		RootPath: "public",
 	}
 }
 
 func (s Store) CreateFile(fileName string) error {
-	file, err := os.Create(path.Join(s.rootPath, fileName))
+	file, err := os.Create(path.Join(s.RootPath, fileName))
 	if err != nil {
 		log.Println("[CreateFile] Error Create")
 		return err
@@ -32,7 +32,7 @@ func (s Store) CreateFile(fileName string) error {
 }
 
 func (s Store) WriteStringFile(fileName string, text string) error {
-	file, err := os.OpenFile(path.Join(s.rootPath, fileName), os.O_APPEND, 0644)
+	file, err := os.OpenFile(path.Join(s.RootPath, fileName), os.O_APPEND, 0644)
 	if err != nil {
 		log.Println("[WriteStringFile] Error Open")
 		return err

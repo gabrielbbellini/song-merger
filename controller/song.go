@@ -1,26 +1,31 @@
 package controller
 
 import (
+	"fmt"
 	"log"
 	"song-merger/entities"
 	"song-merger/model"
 	"strings"
 )
 
-// GenerateSong - Validate song entity before generate the song file.
-func GenerateSong(song entities.Song) (string, error) {
-	song.Artist = strings.TrimSpace(song.Artist)
-	song.Name = strings.TrimSpace(song.Name)
+// GenerateSongs - Validate song entity before generate the song file.
+func GenerateSongs(songs []entities.Song) (string, error) {
+	for index, song := range songs {
+		song.Artist = strings.TrimSpace(song.Artist)
+		song.Name = strings.TrimSpace(song.Name)
 
-	if song.Artist == "" {
-		log.Println("[GenerateSong] Error song.Artist == ''")
-		return "", entities.NewBadRequestError("Artist name can not be empty.")
+		if song.Artist == "" {
+			log.Println("[GenerateSong] Error song.Artist == ''")
+			message := fmt.Sprintf("%dº song - Artist name can not be empty.", index+1)
+			return "", entities.NewBadRequestError(message)
+		}
+
+		if song.Name == "" {
+			log.Println("[GenerateSong] Error song.Name == ''")
+			message := fmt.Sprintf("%dº song - Song name can not be empty.", index+1)
+			return "", entities.NewBadRequestError(message)
+		}
 	}
 
-	if song.Name == "" {
-		log.Println("[GenerateSong] Error song.Name == ''")
-		return "", entities.NewBadRequestError("Song name can not be empty.")
-	}
-
-	return model.GenerateSong(song)
+	return model.GenerateSongs(songs)
 }

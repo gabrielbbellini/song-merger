@@ -2,6 +2,7 @@ package view
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/gorilla/mux"
 	"io"
 	"log"
@@ -25,19 +26,21 @@ func generateSongs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var song entities.Song
-	err = json.Unmarshal(b, &song)
+	var songs []entities.Song
+	err = json.Unmarshal(b, &songs)
 	if err != nil {
-		utils.HandleError(w, err, "[generateSongs] Error Unmarshal")
+		log.Println("[generateSongs] Error Unmarshal")
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	_, err = controller.GenerateSong(song)
+	filename, err := controller.GenerateSongs(songs)
 	if err != nil {
 		utils.HandleError(w, err, "GenerateSong")
 		return
 	}
 
-	_, _ = w.Write([]byte("Sua música foi gerada com sucesso (Ver pasta \"public\" no projeto)."))
+	path := "http://127.0.0.1:8000/public/" + filename
+	_, _ = w.Write([]byte(fmt.Sprintf("Sua música foi gerada com sucesso: %s", path)))
 	return
 }

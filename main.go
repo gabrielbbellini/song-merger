@@ -34,7 +34,9 @@ func main() {
 		ReadTimeout:  15 * time.Second,
 	}
 
-	log.Printf("Listening on %s...", SERVER_URL)
+	fs := http.FileServer(http.Dir("./public/"))
+	router.PathPrefix("/public/").Handler(http.StripPrefix("/public/", fs))
 
+	log.Printf("Listening on %s", SERVER_URL)
 	log.Fatal(server.ListenAndServe())
 }

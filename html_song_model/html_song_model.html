@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Song generator</title>
+</head>
+<body>
+{{ range . }}
+<h1>{{ .Song.Name }}</h1>
+<h2>{{ .Song.Artist }}</h2>
+{{ .HTMLContent }}
+{{ end }}
+<hr>
+</body>
+</html>
