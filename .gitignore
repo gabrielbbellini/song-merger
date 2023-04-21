@@ -18,6 +18,7 @@
 .idea/
 .vscode/
 
+.obsidian/
+
 # Project-specific output files
-song.html
-song.txt
+public
